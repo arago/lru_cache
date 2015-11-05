@@ -1,0 +1,3 @@
+%{"benchfella": {:hex, :benchfella, "0.2.1"},
+  "con_cache": {:hex, :con_cache, "0.9.0"},
+  "exactor": {:hex, :exactor, "2.2.0"}}
