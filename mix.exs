@@ -14,7 +14,7 @@ defmodule LruCache.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :con_cache]]
+    [applications: [:logger]]
   end
 
   # Dependencies can be Hex packages:
@@ -27,7 +27,6 @@ defmodule LruCache.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:con_cache, "~> 0.9.0"},
-     {:benchfella, "~> 0.2.0"}]
+    []
   end
 end
