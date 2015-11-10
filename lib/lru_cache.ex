@@ -50,6 +50,7 @@ defmodule LruCache do
     if :ets.update_element(name, key, {3, value}) do
       touch && Agent.get(name, __MODULE__, :handle_touch, [key])
     end
+    :ok
   end
 
   @doc """
