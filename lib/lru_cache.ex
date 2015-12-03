@@ -4,7 +4,7 @@ defmodule LruCache do
 
   For using it, you need to start it:
 
-    iex> LruCache.start_link(:my_cache, 1000)
+      iex> LruCache.start_link(:my_cache, 1000)
 
   Or add it to your supervisor tree, like: `worker(LruCache, [:my_cache, 1000])`
 
