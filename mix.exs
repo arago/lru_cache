@@ -4,15 +4,15 @@ defmodule LruCache.Mixfile do
 
   def project do
     [app: :lru_cache,
-     version: "0.1.0",
+     version: "0.1.1",
      elixir: "~> 1.2-dev",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps,
+     deps: deps(),
      name: "LRU Cache",
      source_url: @github,
-     description: description,
-     package: package]
+     description: description(),
+     package: package()]
   end
 
   def application do
@@ -30,6 +30,7 @@ defmodule LruCache.Mixfile do
 
   defp package do
     [maintainers: ["Dmitry Russ(Aleksandrov)"],
+     licenses: ["Apache 2.0"],
      links: %{"Github" => @github}]
   end
 end

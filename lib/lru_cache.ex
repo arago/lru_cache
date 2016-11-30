@@ -24,7 +24,6 @@ defmodule LruCache do
   First ets table save the key values pairs, the second save order of inserted elements.
   """
   use GenServer
-  @table LruCache
 
   defstruct table: nil, ttl_table: nil, size: 0
 
