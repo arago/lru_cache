@@ -1,5 +1,5 @@
 defmodule LruCache do
-  @moduledoc """
+  @moduledoc ~S"""
   This modules implements a simple LRU cache, using 2 ets tables for it.
 
   For using it, you need to start it:
@@ -19,19 +19,34 @@ defmodule LruCache do
       iex> LruCache.get(:my_cache, "id", touch = false)
       "value"
 
+  To take some action when old keys are evicted from the cache when it is full,
+  you can pass an `:evict_fn` option to `LruCache.start_link/3`. This is
+  helpful for cleaning up processes that depend on values in the cache, or
+  logging, or instrumentation of cache evictions etc.
+
+      iex> evict = fn(key,value) -> IO.inspect("#{key}=#{value} evicted") end
+      iex> LruCache.start_link(:my_cache, 10, evict_fn: evict)
+      {:ok, #PID<0.60.0>}
+
   ## Design
 
   First ets table save the key values pairs, the second save order of inserted elements.
   """
   use GenServer
 
-  defstruct table: nil, ttl_table: nil, size: 0
+  defstruct table: nil, ttl_table: nil, size: 0, evict_fn: nil
 
   @doc """
   Creates an LRU of the given size as part of a supervision tree with a registered name
+
+  ## Options
+
+    * `:evict_fn` - function that accepts (key, value) and takes some action when keys are
+      evicted when the cache is full.
+
   """
-  def start_link(name, size) do
-    Agent.start_link(__MODULE__, :init, [name, size], [name: name])
+  def start_link(name, size, opts \\ []) do
+    Agent.start_link(__MODULE__, :init, [name, size, opts], [name: name])
   end
 
   @doc """
@@ -72,11 +87,12 @@ defmodule LruCache do
   def delete(name, key), do: Agent.get(name, __MODULE__, :handle_delete, [key])
 
   @doc false
-  def init(name, size) do
+  def init(name, size, opts \\ []) do
     ttl_table = :"#{name}_ttl"
     :ets.new(ttl_table, [:named_table, :ordered_set])
     :ets.new(name, [:named_table, :public, {:read_concurrency, true}])
-    %LruCache{ttl_table: ttl_table, table: name, size: size}
+    evict_fn = Keyword.get(opts, :evict_fn)
+    %LruCache{ttl_table: ttl_table, table: name, size: size, evict_fn: evict_fn}
   end
 
   @doc false
@@ -118,13 +134,20 @@ defmodule LruCache do
     uniq
   end
 
-  defp clean_oversize(%{ttl_table: ttl_table, table: table, size: size}) do
+  defp clean_oversize(state = %{ttl_table: ttl_table, table: table, size: size}) do
     if :ets.info(table, :size) > size do
       oldest_tstamp = :ets.first(ttl_table)
       [{_, old_key}] = :ets.lookup(ttl_table, oldest_tstamp)
       :ets.delete(ttl_table, oldest_tstamp)
+      call_evict_fn(state, old_key)
       :ets.delete(table, old_key)
       true
     else nil end
+  end
+
+  defp call_evict_fn(%{evict_fn: nil}, _old_key), do: nil
+  defp call_evict_fn(%{evict_fn: evict_fn, table: table}, key) do
+    [{_, _, value}] = :ets.lookup(table, key)
+    evict_fn.(key, value)
   end
 end
