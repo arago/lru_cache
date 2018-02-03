@@ -96,6 +96,11 @@ defmodule LruCache do
   end
 
   @doc false
+  def init({name, size, opts}) do
+    init(name, size, opts)
+  end
+
+  @doc false
   def handle_put(state = %{table: table}, key, value) do
     delete_ttl(state, key)
     uniq = insert_ttl(state, key)
