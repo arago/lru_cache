@@ -99,4 +99,20 @@ defmodule LruCacheTest do
     LruCache.put(:test8, 6, "test 6")
     assert nil == LruCache.get(:test8, 1, false)
   end
+
+  test "eviction callback" do
+    test_pid = self()
+    LruCache.start_link(:test9, 3, evict_fn: fn(k, v) ->
+      send(test_pid, {:evicted, k, v})
+    end)
+    LruCache.put(:test9, :a, 1)
+    LruCache.put(:test9, :b, 2)
+    LruCache.put(:test9, :c, 3)
+    LruCache.put(:test9, :d, 4)
+    LruCache.put(:test9, :e, 5)
+
+    assert_received {:evicted, :a, 1}
+    assert_received {:evicted, :b, 2}
+    refute_received {:evicted, :c, 3}
+  end
 end
