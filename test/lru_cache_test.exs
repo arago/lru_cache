@@ -1,6 +1,6 @@
 defmodule LruCacheTest do
   use ExUnit.Case
-  #doctest LruCache
+  # doctest LruCache
 
   test "basic works" do
     assert {:ok, _} = LruCache.start_link(:test1, 10)
@@ -15,9 +15,9 @@ defmodule LruCacheTest do
 
   test "lru limit works" do
     assert {:ok, _} = LruCache.start_link(:test2, 5)
-    Enum.map(1..5, &(LruCache.put(:test2, &1, "test #{&1}")))
+    Enum.map(1..5, &LruCache.put(:test2, &1, "test #{&1}"))
     assert "test 1" = LruCache.get(:test2, 1)
-    Enum.map(6..10, &(LruCache.put(:test2, &1, "test #{&1}")))
+    Enum.map(6..10, &LruCache.put(:test2, &1, "test #{&1}"))
     assert nil == LruCache.get(:test2, 5)
     assert "test 6" = LruCache.get(:test2, 6)
   end
@@ -102,9 +102,13 @@ defmodule LruCacheTest do
 
   test "eviction callback" do
     test_pid = self()
-    LruCache.start_link(:test9, 3, evict_fn: fn(k, v) ->
+
+    evict_fun = fn k, v ->
       send(test_pid, {:evicted, k, v})
-    end)
+    end
+
+    LruCache.start_link(:test9, 3, evict_fn: evict_fun)
+
     LruCache.put(:test9, :a, 1)
     LruCache.put(:test9, :b, 2)
     LruCache.put(:test9, :c, 3)

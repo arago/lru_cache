@@ -1,3 +1,8 @@
+# 0.1.2
+
+Enhancements
+  * add `evict_fn` callback to apply on entry by removing from a cache
+
 # 0.1.1
 
 Enhancements

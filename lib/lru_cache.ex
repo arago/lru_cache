@@ -46,7 +46,7 @@ defmodule LruCache do
 
   """
   def start_link(name, size, opts \\ []) do
-    Agent.start_link(__MODULE__, :init, [name, size, opts], [name: name])
+    Agent.start_link(__MODULE__, :init, [name, size, opts], name: name)
   end
 
   @doc """
@@ -64,6 +64,7 @@ defmodule LruCache do
     if :ets.update_element(name, key, {3, value}) do
       touch && Agent.get(name, __MODULE__, :handle_touch, [key])
     end
+
     :ok
   end
 
@@ -76,6 +77,7 @@ defmodule LruCache do
       [{_, _, value}] ->
         touch && Agent.get(name, __MODULE__, :handle_touch, [key])
         value
+
       [] ->
         nil
     end
@@ -128,6 +130,7 @@ defmodule LruCache do
     case :ets.lookup(table, key) do
       [{_, old_uniq, _}] ->
         :ets.delete(ttl_table, old_uniq)
+
       _ ->
         nil
     end
@@ -147,10 +150,13 @@ defmodule LruCache do
       call_evict_fn(state, old_key)
       :ets.delete(table, old_key)
       true
-    else nil end
+    else
+      nil
+    end
   end
 
   defp call_evict_fn(%{evict_fn: nil}, _old_key), do: nil
+
   defp call_evict_fn(%{evict_fn: evict_fn, table: table}, key) do
     [{_, _, value}] = :ets.lookup(table, key)
     evict_fn.(key, value)
