@@ -1,3 +1,8 @@
+# 0.1.3
+
+Enhancements
+  * Add timeout optional argument to operations on cache
+
 # 0.1.2
 
 Enhancements

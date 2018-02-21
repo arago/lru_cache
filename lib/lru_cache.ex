@@ -53,16 +53,17 @@ defmodule LruCache do
   Stores the given `value` under `key` in `cache`. If `cache` already has `key`, the stored
   `value` is replaced by the new one. This updates the order of LRU cache.
   """
-  def put(name, key, value), do: Agent.get(name, __MODULE__, :handle_put, [key, value])
+  def put(name, key, value, timeout \\ 5000),
+    do: Agent.get(name, __MODULE__, :handle_put, [key, value], timeout)
 
   @doc """
   Updates a `value` in `cache`. If `key` is not present in `cache` then nothing is done.
   `touch` defines, if the order in LRU should be actualized. The function assumes, that
   the element exists in a cache.
   """
-  def update(name, key, value, touch \\ true) do
+  def update(name, key, value, touch \\ true, timeout \\ 5000) do
     if :ets.update_element(name, key, {3, value}) do
-      touch && Agent.get(name, __MODULE__, :handle_touch, [key])
+      touch && Agent.get(name, __MODULE__, :handle_touch, [key], timeout)
     end
 
     :ok
@@ -72,10 +73,10 @@ defmodule LruCache do
   Returns the `value` associated with `key` in `cache`. If `cache` does not contain `key`,
   returns nil. `touch` defines, if the order in LRU should be actualized.
   """
-  def get(name, key, touch \\ true) do
+  def get(name, key, touch \\ true, timeout \\ 5000) do
     case :ets.lookup(name, key) do
       [{_, _, value}] ->
-        touch && Agent.get(name, __MODULE__, :handle_touch, [key])
+        touch && Agent.get(name, __MODULE__, :handle_touch, [key], timeout)
         value
 
       [] ->
@@ -86,7 +87,8 @@ defmodule LruCache do
   @doc """
   Removes the entry stored under the given `key` from cache.
   """
-  def delete(name, key), do: Agent.get(name, __MODULE__, :handle_delete, [key])
+  def delete(name, key, timeout \\ 5000),
+    do: Agent.get(name, __MODULE__, :handle_delete, [key], timeout)
 
   @doc false
   def init(name, size, opts \\ []) do
