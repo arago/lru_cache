@@ -8,15 +8,19 @@ The package can be installed as:
 
   1. Add lru_cache to your list of dependencies in `mix.exs`:
 
-        def deps do
-          [{:lru_cache, "~> 0.1.0"}]
-        end
+```elixir
+  def deps do
+    [{:lru_cache, "~> 0.1.0"}]
+  end
+```
 
   2. Ensure lru_cache is started before your application:
 
-        def application do
-          [applications: [:lru_cache]]
-        end
+```elixir
+  def application do
+    [applications: [:lru_cache]]
+  end
+```
 
 ## Using
 
@@ -28,7 +32,7 @@ worker(LruCache, [:my_cache, 10])
 
 Or starting it manually:
 
-```
+```elixir
 LruCache.start_link(:my_cache, 10)
 ```
 
