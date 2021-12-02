@@ -88,10 +88,6 @@ defmodule LruCache do
   end
 
   @doc """
-  Returns the `value` associated with `key` in `cache`. If `cache` does not contain `key`,
-  first we try to run the passed `put_fun`.   """
-
-  @doc """
   Removes the entry stored under the given `key` from cache.
   """
   def delete(name, key, timeout \\ 5000),
