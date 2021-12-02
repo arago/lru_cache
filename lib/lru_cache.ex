@@ -72,17 +72,24 @@ defmodule LruCache do
   @doc """
   Returns the `value` associated with `key` in `cache`. If `cache` does not contain `key`,
   returns nil. `touch` defines, if the order in LRU should be actualized.
+  If `put_fun` is defined and does not return nil, the value returned from `put_fun`
+  written to the cache returned. If `put_fun` returns nil, then this function does not
+  write to the cache. `touch` defines, if the order in LRU should be actualized.
   """
-  def get(name, key, touch \\ true, timeout \\ 5000) do
+  def get(name, key, touch \\ true, timeout \\ 5000, put_fun \\ nil) do
     case :ets.lookup(name, key) do
       [{_, _, value}] ->
         touch && Agent.get(name, __MODULE__, :handle_touch, [key], timeout)
         value
 
       [] ->
-        nil
+        get_with_put(put_fun, name, key, timeout)
     end
   end
+
+  @doc """
+  Returns the `value` associated with `key` in `cache`. If `cache` does not contain `key`,
+  first we try to run the passed `put_fun`.   """
 
   @doc """
   Removes the entry stored under the given `key` from cache.
@@ -163,4 +170,18 @@ defmodule LruCache do
     [{_, _, value}] = :ets.lookup(table, key)
     evict_fn.(key, value)
   end
+
+  defp get_with_put(nil, _name, _key, _timeout), do: nil
+
+  defp get_with_put(put_fun, name, key, timeout) do
+    case put_fun.(key) do
+      nil ->
+        nil
+
+      put_value ->
+        put(name, key, put_value, timeout)
+        put_value
+    end
+  end
+
 end

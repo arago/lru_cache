@@ -44,4 +44,11 @@ LruCache.get(:my_cache, "id")
 LruCache.get(:my_cache, "id", touch = false)
 LruCache.update(:my_cache, "id", "new_value", touch = false)
 LruCache.delete(:my_cache, "id")
+LruCache.get(
+  :my_cache,
+  "id",
+  _touch = false,
+  _timeout = 5000,
+  _put_fun = fn key -> key ++ "_found" end
+)
 ```

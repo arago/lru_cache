@@ -119,4 +119,14 @@ defmodule LruCacheTest do
     assert_received {:evicted, :b, 2}
     refute_received {:evicted, :c, 3}
   end
+
+  test "get with put fun" do
+    assert {:ok, _} = LruCache.start_link(:test10, 5)
+    assert nil == LruCache.get(:test10, :a)
+    LruCache.get(:test10, :a, true, 5000, fn _key -> 1 end)
+    assert 1 == LruCache.get(:test10, :a)
+    LruCache.get(:test10, :b, true, 5000, fn _key -> nil end)
+    assert nil == LruCache.get(:test10, :b)
+  end
+
 end
