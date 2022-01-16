@@ -22,7 +22,10 @@ defmodule LruCache.Mixfile do
   end
 
   defp deps do
-    [{:earmark, "~> 0.1", only: :dev}, {:ex_doc, "~> 0.11", only: :dev}]
+    [
+      {:earmark, "~> 1.0", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false}
+    ]
   end
 
   defp description do

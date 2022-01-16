@@ -119,4 +119,22 @@ defmodule LruCacheTest do
     assert_received {:evicted, :b, 2}
     refute_received {:evicted, :c, 3}
   end
+
+  test "yield" do
+    assert {:ok, _} = LruCache.start_link(:test10, 5)
+    assert nil == LruCache.get(:test10, :a)
+
+    # Inserts value returned by function if not found.
+    LruCache.yield(:test10, :a, fn _key -> 1 end)
+    assert 1 == LruCache.get(:test10, :a)
+
+    # Does not insert on nil return.
+    LruCache.yield(:test10, :b, fn _key -> nil end)
+    assert nil == LruCache.get(:test10, :b)
+
+    # Does not modify value if found.
+    LruCache.put(:test10, :c, 1)
+    assert 1 == LruCache.yield(:test10, :c, fn key -> key + 1 end)
+  end
+
 end

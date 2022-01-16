@@ -44,4 +44,5 @@ LruCache.get(:my_cache, "id")
 LruCache.get(:my_cache, "id", touch = false)
 LruCache.update(:my_cache, "id", "new_value", touch = false)
 LruCache.delete(:my_cache, "id")
+LruCache.yield(:my_cache, "id", fn key -> key ++ "_found" end)
 ```

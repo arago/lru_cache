@@ -85,6 +85,22 @@ defmodule LruCache do
   end
 
   @doc """
+  Attempts to return the `value` associated with `key` in `cache`. If `cache` does not
+  contain `key`, the `yield_fn` is called. If the `yield_fn` is called and returns nil,
+  no new value will be put into the cache. Otherwise, the value returned will be inserted.
+  `touch` defines, if the order in LRU should be actualized for the initial get.
+  """
+  def yield(name, key, yield_fn, touch \\ true, timeout \\ 5000) do
+    case get(name, key, touch, timeout) do
+      nil ->
+        call_yield_fn(yield_fn, name, key, timeout)
+
+      value ->
+        value
+    end
+  end
+
+  @doc """
   Removes the entry stored under the given `key` from cache.
   """
   def delete(name, key, timeout \\ 5000),
@@ -163,4 +179,16 @@ defmodule LruCache do
     [{_, _, value}] = :ets.lookup(table, key)
     evict_fn.(key, value)
   end
+
+  defp call_yield_fn(yield_fn, name, key, timeout) do
+    case yield_fn.(key) do
+      nil ->
+        nil
+
+      value ->
+        put(name, key, value, timeout)
+        value
+    end
+  end
+
 end
